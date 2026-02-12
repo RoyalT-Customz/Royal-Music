@@ -11,6 +11,18 @@ interface Track {
   prompt: string;
   status: string;
   message?: string;
+  composition?: {
+    title: string;
+    genre: string;
+    mood: string;
+    bpm: number;
+    key: string;
+    duration: string;
+    instruments: string[];
+    structure: { section: string; bars: number; description: string }[];
+    description: string;
+  };
+  model?: string;
 }
 
 export default function Home() {
@@ -67,7 +79,7 @@ export default function Home() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500" />
             </span>
             <span className="text-xs text-zinc-400 font-medium">
-              Powered by AI — Now in Beta
+              Powered by Claude 4.6 — Now in Beta
             </span>
           </div>
 

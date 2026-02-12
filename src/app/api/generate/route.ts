@@ -1,54 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Placeholder async function that simulates music generation.
+ * Replace this with a real music generation API call (e.g. Suno, MusicGen, etc.)
+ */
+async function generateMusic(prompt: string): Promise<string> {
+  // Simulate processing delay
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // Return a placeholder audio URL
+  return `https://cdn.example.com/tracks/generated_${Date.now()}.mp3`;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { prompt } = await req.json();
+    const body = await req.json();
+    const { prompt, style } = body as { prompt: string; style?: string };
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
-        { error: "A valid prompt is required." },
+        { success: false, error: "A valid prompt is required." },
         { status: 400 }
       );
     }
 
-    const apiKey = process.env.AI_API_KEY;
-    const apiUrl = process.env.AI_API_URL;
+    // Build the full prompt, incorporating style if provided
+    const fullPrompt = style ? `${prompt} (style: ${style})` : prompt;
 
-    if (!apiKey || !apiUrl || apiKey === "your-api-key-here") {
-      // Return a mock response for development
-      return NextResponse.json({
-        success: true,
-        data: {
-          id: `track_${Date.now()}`,
-          prompt,
-          status: "processing",
-          message:
-            "AI generation is not configured yet. Connect your API in .env.local to enable real generation.",
-        },
-      });
-    }
+    const audioUrl = await generateMusic(fullPrompt);
 
-    // Real API call (replace with your provider's integration)
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt }),
+    return NextResponse.json({
+      success: true,
+      audioUrl,
     });
-
-    if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Generation error:", error);
+
+    const message =
+      error instanceof Error ? error.message : "An unknown error occurred.";
+
     return NextResponse.json(
-      { error: "Failed to generate music. Please try again." },
+      { success: false, error: message },
       { status: 500 }
     );
   }
