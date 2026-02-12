@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 
-export default function Navbar() {
+interface NavbarProps {
+  credits: number;
+}
+
+export default function Navbar({ credits }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/[0.06]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,6 +36,12 @@ export default function Navbar() {
               Create
             </Link>
             <Link
+              href="/enhance"
+              className="text-sm text-zinc-400 hover:text-white transition-colors"
+            >
+              Enhance
+            </Link>
+            <Link
               href="/"
               className="text-sm text-zinc-400 hover:text-white transition-colors"
             >
@@ -47,6 +57,14 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            {/* Credit Counter */}
+            <div className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border ${credits > 0 ? 'border-brand-500/30 bg-brand-500/10 text-brand-300' : 'border-red-500/30 bg-red-500/10 text-red-400'} transition-colors`}>
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+              </svg>
+              <span className="font-semibold">{credits}</span>
+              <span className="text-xs opacity-70 hidden sm:inline">credits</span>
+            </div>
             <button className="text-sm text-zinc-400 hover:text-white transition-colors px-3 py-1.5">
               Sign In
             </button>

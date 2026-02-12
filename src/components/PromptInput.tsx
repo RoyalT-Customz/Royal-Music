@@ -5,6 +5,7 @@ import { useState } from "react";
 interface PromptInputProps {
   onGenerate: (prompt: string) => void;
   isLoading: boolean;
+  credits: number;
 }
 
 const EXAMPLE_PROMPTS = [
@@ -18,11 +19,14 @@ const EXAMPLE_PROMPTS = [
 export default function PromptInput({
   onGenerate,
   isLoading,
+  credits,
 }: PromptInputProps) {
   const [prompt, setPrompt] = useState("");
 
+  const noCredits = credits <= 0;
+
   const handleSubmit = () => {
-    if (prompt.trim() && !isLoading) {
+    if (prompt.trim() && !isLoading && !noCredits) {
       onGenerate(prompt.trim());
     }
   };
@@ -51,7 +55,7 @@ export default function PromptInput({
             />
             <button
               onClick={handleSubmit}
-              disabled={!prompt.trim() || isLoading}
+              disabled={!prompt.trim() || isLoading || noCredits}
               className="flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 disabled:from-zinc-700 disabled:to-zinc-700 disabled:text-zinc-500 text-white font-medium text-sm px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/40 disabled:shadow-none mb-1.5 mr-1 shrink-0"
             >
               {isLoading ? (
@@ -89,6 +93,19 @@ export default function PromptInput({
           </div>
         </div>
       </div>
+
+      {/* Out of credits notice */}
+      {noCredits && (
+        <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20">
+          <svg className="w-4 h-4 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm text-red-400">You&apos;re out of credits.</span>
+          <button className="text-sm font-semibold text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors">
+            Upgrade to continue
+          </button>
+        </div>
+      )}
 
       {/* Example prompts */}
       <div className="flex flex-wrap items-center justify-center gap-2">

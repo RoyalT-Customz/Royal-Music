@@ -80,3 +80,52 @@ body {
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+
+/* Song card entrance animation */
+@keyframes cardSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.song-card {
+  animation: cardSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Fade in for error messages */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+/* Subtle pulsing glow for loading state */
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(124, 26, 255, 0.3),
+      0 0 30px -5px rgba(124, 26, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(124, 26, 255, 0.5),
+      0 0 50px -5px rgba(124, 26, 255, 0.35);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}

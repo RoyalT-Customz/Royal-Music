@@ -5,33 +5,19 @@ import Navbar from "@/components/Navbar";
 import PromptInput from "@/components/PromptInput";
 import MusicPlayer from "@/components/MusicPlayer";
 import BackgroundEffects from "@/components/BackgroundEffects";
-
-interface Track {
-  id: string;
-  prompt: string;
-  status: string;
-  message?: string;
-  composition?: {
-    title: string;
-    genre: string;
-    mood: string;
-    bpm: number;
-    key: string;
-    duration: string;
-    instruments: string[];
-    structure: { section: string; bars: number; description: string }[];
-    description: string;
-  };
-  model?: string;
-}
+import SongCard from "@/components/SongCard";
+import type { Song } from "@/components/SongCard";
 
 export default function Home() {
-  const [track, setTrack] = useState<Track | null>(null);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [credits, setCredits] = useState(5);
 
   const handleGenerate = async (prompt: string) => {
+    if (credits <= 0) return;
     setIsLoading(true);
-    setTrack(null);
+    setError(null);
 
     try {
       const res = await fetch("/api/generate", {
@@ -42,23 +28,21 @@ export default function Home() {
 
       const json = await res.json();
 
-      if (json.success) {
-        setTrack(json.data);
-      } else {
-        setTrack({
-          id: `error_${Date.now()}`,
+      if (json.success && json.audioUrl) {
+        const newSong: Song = {
+          id: crypto.randomUUID(),
+          title: json.title || "Untitled Track",
           prompt,
-          status: "error",
-          message: json.error || "Something went wrong.",
-        });
+          audioUrl: json.audioUrl,
+          createdAt: Date.now(),
+        };
+        setSongs((prev) => [newSong, ...prev]);
+        setCredits((prev) => Math.max(0, prev - 1));
+      } else {
+        setError(json.error || "Something went wrong.");
       }
     } catch {
-      setTrack({
-        id: `error_${Date.now()}`,
-        prompt,
-        status: "error",
-        message: "Network error. Please try again.",
-      });
+      setError("Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -67,10 +51,10 @@ export default function Home() {
   return (
     <main className="relative min-h-screen">
       <BackgroundEffects />
-      <Navbar />
+      <Navbar credits={credits} />
 
       {/* Hero Section */}
-      <section className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 pt-16">
+      <section className="relative z-10 flex flex-col items-center justify-center px-4 pt-32 sm:pt-40">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-10">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-full px-4 py-1.5 mb-8">
@@ -100,13 +84,37 @@ export default function Home() {
         </div>
 
         {/* Prompt Input */}
-        <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+        <PromptInput onGenerate={handleGenerate} isLoading={isLoading} credits={credits} />
 
-        {/* Music Player */}
-        <MusicPlayer track={track} isLoading={isLoading} />
+        {/* Loading / Error indicator */}
+        <MusicPlayer
+          audioUrl={null}
+          error={error}
+          isLoading={isLoading}
+          hasSongs={songs.length > 0}
+        />
+
+        {/* Songs Grid */}
+        {songs.length > 0 && (
+          <div className="w-full max-w-6xl mx-auto mt-10 mb-16">
+            <div className="flex items-center justify-between mb-6 px-1">
+              <h2 className="text-sm font-semibold text-zinc-300">
+                Your Library
+                <span className="ml-2 text-xs font-normal text-zinc-600">
+                  {songs.length} {songs.length === 1 ? "track" : "tracks"}
+                </span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {songs.map((song, i) => (
+                <SongCard key={song.id} song={song} index={i} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats bar */}
-        <div className="flex items-center justify-center gap-8 sm:gap-12 mt-16 mb-8">
+        <div className="flex items-center justify-center gap-8 sm:gap-12 mt-8 mb-16">
           {[
             { label: "Tracks Created", value: "2.4M+" },
             { label: "Active Users", value: "180K+" },
